@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting AI | Action Extractor</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* Sidebar */
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #101b35;
+    color: white;
+    position: fixed;
+    padding: 30px 20px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 45px;
+}
+
+.logo span {
+    color: #60a5fa;
+}
+
+.menu {
+    padding: 14px;
+    background: #263858;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.menu.active {
+    background: #2563eb;
+}
+
+.sidebar-bottom {
+    position: absolute;
+    bottom: 25px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* Main content */
+
+.main {
+    margin-left: 250px;
+    padding: 35px 45px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.topbar h1 {
+    font-size: 28px;
+}
+
+.profile {
+    background: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Welcome section */
+
+.welcome {
+    background: linear-gradient(120deg, #1d4ed8, #6366f1);
+    padding: 30px;
+    border-radius: 16px;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.welcome h2 {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+.welcome p {
+    color: #dbeafe;
+}
+
+/* Cards */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #00000008;
+}
+
+.stat-card h3 {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.stat-card p {
+    font-size: 27px;
+    font-weight: bold;
+}
+
+/* Main editor */
+
+.editor {
+    background: white;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #00000008;
+}
+
+.editor h2 {
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 15px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+}
+
+textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #2563eb15;
+}
+
+select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+}
+
+/* Button */
+
+.extract-btn {
+    margin-top: 25px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.extract-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+.extract-btn:disabled {
+    background: #94a3b8;
+    cursor: wait;
+    transform: none;
+}
+
+/* Status */
+
+#status {
+    margin-top: 18px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.success {
+    color: #15803d;
+}
+
+.error {
+    color: #dc2626;
+}
+
+/* Results */
+
+.results {
+    margin-top: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #00000008;
+    overflow-x: auto;
+}
+
+.results h2 {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 450px;
+}
+
+th {
+    background: #eff6ff;
+    color: #1e40af;
+    text-align: left;
+}
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+.hidden {
+    display: none;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* Responsive */
+
+@media(max-width: 900px) {
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+
+    <div class="logo">Meeting<span>AI</span></div>
+
+    <div class="menu active">⌂ &nbsp; Dashboard</div>
+    <div class="menu">✦ &nbsp; Action Extractor</div>
+    <div class="menu">▤ &nbsp; Meeting Notes</div>
+    <div class="menu">⚙ &nbsp; Settings</div>
+
+    <div class="sidebar-bottom">
+        AI Meeting Assistant<br>
+        Local Application
+    </div>
+
+</div>
+
+<!-- Main -->
+
+<div class="main">
+
+    <div class="topbar">
+        <h1>Dashboard</h1>
+        <div class="profile">👤 Meeting Assistant</div>
+    </div>
+
+    <!-- Welcome -->
+
+    <div class="welcome">
+        <h2>Welcome to Meeting AI 👋</h2>
+        <p>Transform your meeting notes into organized action items using Artificial Intelligence.</p>
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h3>AI ENGINE</h3>
+            <p>Gemini</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>EXTRACTION MODES</h3>
+            <p>02</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>APPLICATION STATUS</h3>
+            <p style="color:#16a34a">Ready</p>
+        </div>
+
+    </div>
+
+    <!-- Editor -->
+
+    <div class="editor">
+
+        <h2>Meeting Action Extractor</h2>
+
+        <p class="subtitle">
+            Paste your meeting transcript below to automatically identify tasks, owners and deadlines.
+        </p>
+
+        <label for="notes">Meeting Notes</label>
+
+        <textarea id="notes"
+        placeholder="Paste your meeting notes here...
+
+Example:
+John: I will prepare the documentation by Friday.
+Sarah: I will complete the UI design by Monday."></textarea>
+
+        <label for="mode">Select AI Processing Mode</label>
+
+        <select id="mode">
+            <option value="gemini">Gemini AI - Intelligent Extraction</option>
+            <option value="offline">Offline - Pattern-Based Extraction</option>
+        </select>
+
+        <button class="extract-btn" id="extractBtn"
+        onclick="extractActions()">
+            ✨ Extract Action Items
+        </button>
+
+        <p id="status"></p>
+
+    </div>
+
+    <!-- Results -->
+
+    <div class="results hidden" id="results">
+
+        <h2>📋 Extracted Action Items</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th>Task</th>
+                    <th>Deadline</th>
+                </tr>
+            </thead>
+
+            <tbody id="resultBody"></tbody>
+        </table>
+
+    </div>
+
+    <div class="footer">
+        Meeting AI | Powered by Gemini API | Local Web Application
+    </div>
+
+</div>
+
+<script>
+
+async function extractActions() {
+
+    const notes = document.getElementById("notes").value;
+    const mode = document.getElementById("mode").value;
+
+    const button = document.getElementById("extractBtn");
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
+    const resultBody = document.getElementById("resultBody");
+
+    if (!notes.trim()) {
+        status.className = "error";
+        status.textContent = "Please enter meeting notes first!";
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "⏳ Processing...";
+
+    status.className = "";
+    status.textContent = "Analyzing meeting notes...";
+
+    results.classList.add("hidden");
+    resultBody.innerHTML = "";
+
+    try {
+
+        const response = await fetch("/extract", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                notes: notes,
+                mode: mode
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Extraction failed");
+        }
+
+        if (!data.success) {
+            throw new Error("Unable to extract action items");
+        }
+
+        if (data.actions.length === 0) {
+            status.className = "success";
+            status.textContent = "No action items found.";
+            return;
+        }
+
+        data.actions.forEach(action => {
+
+            const row = document.createElement("tr");
+
+            [action.owner, action.task, action.deadline].forEach(value => {
+
+                const cell = document.createElement("td");
+
+                // Safe text rendering
+                cell.textContent = value;
+
+                row.appendChild(cell);
+
+            });
+
+            resultBody.appendChild(row);
+
+        });
+
+        results.classList.remove("hidden");
+
+        status.className = "success";
+
+        status.textContent =
+            "✓ Successfully extracted " +
+            data.actions.length +
+            " action items!";
+
+    }
+
+    catch(error) {
+
+        status.className = "error";
+        status.textContent = "Error: " + error.message;
+
+    }
+
+    finally {
+
+        button.disabled = false;
+        button.textContent = "✨ Extract Action Items";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
